@@ -1,0 +1,91 @@
+from datetime import datetime
+import os
+
+os.system('chcp 65001 > nul')  
+
+
+def limpar_tela():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+
+def detectar_refeicao():
+    """Detecta automaticamente o tipo de refeição com base na hora do sistema."""
+    hora = datetime.now().hour
+
+    if 5 <= hora < 11:
+        return "café da manhã", 7
+    elif 11 <= hora < 15:
+        return "almoço", 10
+    elif 15 <= hora < 19:
+        return "lanche", 10
+    else:
+        return "jantar", 15
+
+
+def calcular_insulina(glicemia, resultado2):
+    """Lógica unificada para calcular e exibir a dose de insulina."""
+    refeicao, divisor = detectar_refeicao()
+    print(
+        f"\nRefeição detectada por horário: {refeicao.upper()} (Fator: {divisor})"
+    )
+
+    carboidratos = float(
+        input("Quantos carboidratos você pretende ingerir? (em gramas) ")
+    )
+
+    insulina_carb = carboidratos / divisor
+    insulina_final = insulina_carb + resultado2
+
+    print(f"\n{carboidratos} / {divisor} = {insulina_carb:.2f}")
+    print(
+        f"{insulina_carb:.2f} + {resultado2:.2f} = {insulina_final:.2f}"
+    )
+    print(f"Aplique {max(0.0, insulina_final):.1f} unidades de insulina.\n")
+
+
+while True:
+    limpar_tela()
+    print("======================\nBem-vindo ao AutoGlick\n======================")
+    print("Atualização (versão 2.0)\n")
+    print("O AutoGlick é uma ferramenta estritamente informativa, desenvolvida para auxiliar na automação de cálculos matemáticos")
+    print("relacionados ao controle glicêmico e à contagem de carboidratos com base nos dados fornecidos por você.\n")
+    print("Nós não realizamos atualizações, modificações ou alterações de conduta médica, metas glicêmicas e fatores")
+    print("de sensibilidade sem a expressa orientação e autorização de um profissional de saúde qualificado (endocrinologista,")
+    print("médico ou nutricionista).\n")
+
+    try:
+        glicemia = int(input("Quanto está sua glicemia? "))
+
+        # 1. ABAIXO DO ALVO
+        if glicemia < 70:
+            print("\nSua glicemia está muito baixa. Corrija imediatamente.")
+            print(
+                "Sugestão: Consuma 15-20g de carboidratos de absorção rápida e confira após 15 min."
+            )
+            print(
+                "Caso o problema persista, procure atendimento médico o mais rápido possível."
+            )
+
+        # 2. DENTRO OU ACIMA DO ALVO
+        else:
+            resultado = glicemia - 100
+            resultado2 = resultado / 30
+
+            print(f"\n{glicemia} - 100 = {resultado}")
+            print(f"{resultado} / 30 = {resultado2}")
+
+            if 70 <= glicemia <= 117:
+                print("Sua glicemia já está no alvo. Não é necessário correção glicêmica.")
+                resultado2 = max(0.0, resultado2)
+            elif 118 <= glicemia <= 300:
+                print("Sua glicemia está um pouco alta.")
+            else:
+                print("Sua glicemia está MUITO alta.")
+
+            calcular_insulina(glicemia, resultado2)
+        if input("Quer voltar ao menu inicial? (S/N) ").lower() != 's':
+            break
+
+    except ValueError:
+        print("\nErro: Digite apenas números válidos.")
+        input("Pressione Enter para tentar novamente...")
